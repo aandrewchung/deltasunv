@@ -30,6 +30,8 @@ app.get('/burn', (req, res) => {
     res.sendFile(__dirname + '/burn.html');
 });
 
+app.use('/images', express.static('images'));
+
 // Handle form submission
 app.post('/submit', async (req, res) => {
     try {
