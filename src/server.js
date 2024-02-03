@@ -14,6 +14,8 @@ const upload = multer({ dest: 'uploads/' }); // This saves files to the 'uploads
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use('/images', express.static(__dirname + '/images'));
+
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/home.html');
 });
@@ -29,8 +31,6 @@ app.get('/newFuneral', (req, res) => {
 app.get('/burn', (req, res) => {
     res.sendFile(__dirname + '/burn.html');
 });
-
-app.use('/images', express.static('images'));
 
 // Handle form submission
 app.post('/submit', async (req, res) => {
@@ -111,4 +111,11 @@ app.post('/burnXRP', upload.none(), async (req, res) => {
 
 app.listen(port, () => {
     console.log(`Server listening at http://localhost:${port}`);
+});
+
+
+app._router.stack.forEach((middleware) => {
+    if (middleware.route) { // if it's a route handler
+        console.log(`${Object.keys(middleware.route.methods)[0].toUpperCase()} ${middleware.route.path}`);
+    }
 });
