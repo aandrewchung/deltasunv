@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Burn XRP Tokens</title>
+</head>
+<body>
+    <form id="burnForm">
+        <label for="seed">Seed:</label>
+        <input type="text" id="seed" name="seed" placeholder="Enter your seed" required>
+        <label for="amount">Amount:</label>
+        <input type="number" id="amount" name="amount" placeholder="Amount of XRP to burn" required>
+        <button type="button" id="burnButton">Burn</button>
+    </form>
+
+    <script>
+        document.getElementById('burnButton').addEventListener('click', function() {
+            const seed = document.getElementById('seed').value;
+            const amount = document.getElementById('amount').value;
+        
+            fetch('/burnXRP', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ seed, amount }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Display a success message
+                    document.body.innerHTML += "<p>BURN WAS SUCCESSFUL</p>"; // Adjust as needed for your page layout
+                } else {
+                    // Handle the case where the server responded but the burn was not successful
+                    alert("Failed to burn XRP: " + data.message);
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                alert('An error occurred while attempting to burn XRP.');
+            });
+        });
+        </script>
+        
+</body>
+</html>

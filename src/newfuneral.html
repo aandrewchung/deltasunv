@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create New Funeral</title>
+</head>
+<body>
+    <form id="funeralForm" enctype="multipart/form-data">
+        <input type="file" id="picture" accept="image/*" required><br>
+        <input type="text" id="firstName" placeholder="First Name" required><br>
+        <input type="text" id="lastName" placeholder="Last Name" required><br>
+        <input type="date" id="dateOfBirth" placeholder="Date of Birth" required><br>
+        <input type="date" id="dateOfDeath" placeholder="Date of Death" required><br>
+        <input type="text" id="aiBackground" placeholder="AI Background" required><br>
+        <textarea id="story" placeholder="Story" required></textarea><br>
+        <button type="button" id="submitFuneral">Submit</button>
+    </form>
+
+    <script>
+document.getElementById('submitFuneral').addEventListener('click', function() {
+    const formData = new FormData();
+    formData.append('picture', document.getElementById('picture').files[0]);
+    formData.append('firstName', document.getElementById('firstName').value);
+    formData.append('lastName', document.getElementById('lastName').value);
+    formData.append('dateOfBirth', document.getElementById('dateOfBirth').value);
+    formData.append('dateOfDeath', document.getElementById('dateOfDeath').value);
+    formData.append('aiBackground', document.getElementById('aiBackground').value);
+    formData.append('story', document.getElementById('story').value);
+
+    fetch('/newFuneral', {
+        method: 'POST',
+        body: formData,
+    })
+    .then(response => response.json())
+    .then(data => {
+        if(data.success) {
+            // Redirect to profile.html if funeral created successfully
+            window.location.href = '/profile';
+        } else {
+            // Handle error or unsuccessful creation
+            alert(data.message);
+        }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+        alert('An error occurred while creating the funeral.');
+    });
+});
+
+    </script>
+    
+</body>
+</html>

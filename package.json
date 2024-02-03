@@ -1,0 +1,22 @@
+{
+  "name": "test-webconfig",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "webpack": "^5.90.1",
+    "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "five-bells-condition": "^5.0.1",
+    "multer": "^1.4.5-lts.1",
+    "xrpl": "^3.0.0"
+  }
+}

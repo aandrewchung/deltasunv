@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Drag and Drop Image Upload</title>
+<style>
+    body {
+        display: flex;
+        flex-direction: column; /* Change to column to stack elements vertically */
+        justify-content: flex-start; /* Align items to the start */
+        align-items: center;
+        height: 100vh;
+        margin: 0; /* Remove default margin */
+    }
+    .toggle-container { /* New container for the toggle */
+        margin-top: 20px;
+        text-align: center;
+    }
+    .content-container { /* Container for the rest of the content */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-grow: 1; /* Take up remaining space */
+        width: 100%; /* Full width */
+    }
+    .upload-box, .input-form {
+        margin: 10px;
+        padding: 20px;
+        border: 2px solid #000;
+    }
+    .upload-box {
+        flex: 1;
+        min-width: 300px;
+        text-align: center;
+    }
+    .input-form {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        max-width: 300px;
+    }
+    .input-field {
+        margin: 10px 0;
+        padding: 10px;
+        font-size: 16px;
+    }
+    .submit-btn {
+        padding: 10px 20px;
+        font-size: 18px;
+        cursor: pointer;
+    }
+    .upload-icon {
+        font-size: 48px;
+        color: #000;
+    }
+</style>
+</head>
+<body>
+
+<div class="toggle-container">
+    <label>Toggle Sender/Receiver:</label>
+    <input type="checkbox" id="modeToggle" /> <span id="modeLabel">Sender</span>
+</div>
+
+<div class="content-container"> <!-- Wrap the main content in a container -->
+    <div class="upload-box" id="uploadBox">
+        <div class="upload-icon">📤</div>
+        <p>Drag and drop an image file here, or click to select a file.</p>
+        <input type="file" id="fileInput" style="display: none;" accept="image/*" />
+    </div>
+
+    <!-- Sender Form -->
+    <div id="senderForm">
+        <input type="text" id="seedInput" placeholder="Your Seed" class="input-field">
+        <input type="text" id="receiverAddressInput" placeholder="Receiver Address" class="input-field">
+        <input type="number" id="escrowAmountInput" placeholder="Escrow Amount" class="input-field">
+    </div>
+
+    <!-- Receiver Form (hidden initially) -->
+    <div id="receiverForm" style="display: none;">
+        <input type="text" id="receiverSeedInput" placeholder="Your Seed" class="input-field">
+        <input type="text" id="originalAddressInput" placeholder="Original Address" class="input-field">
+        <input type="number" id="sequenceNumberInput" placeholder="Sequence Number" class="input-field">
+    </div>
+
+    <button type="button" class="submit-btn">Submit</button>
+</div>
+
+
+<script>
+document.getElementById('uploadBox').addEventListener('click', function() {
+    document.getElementById('fileInput').click();
+});
+
+document.getElementById('uploadBox').addEventListener('dragover', function(event) {
+    event.preventDefault();
+});
+
+document.getElementById('uploadBox').addEventListener('drop', function(event) {
+    event.preventDefault();
+    if (event.dataTransfer.files.length) {
+        let file = event.dataTransfer.files[0];
+        console.log('File you dragged here is', file.name);
+
+        // Create a FileReader object
+        var reader = new FileReader();
+
+        // Define what happens on successful data read
+        reader.onload = function(event) {
+            // Create an image element
+            var img = document.createElement('img');
+            img.src = event.target.result;
+
+            // Set image style if necessary
+            img.style.maxWidth = '100%';
+            img.style.maxHeight = '100%';
+
+            // Append the image to the upload box or another element
+            document.getElementById('uploadBox').appendChild(img);
+        };
+
+        // Read the file as Data URL (base64 encoded string of the file data)
+        reader.readAsDataURL(file);
+    }
+});
+
+
+document.getElementById('fileInput').addEventListener('change', function(event) {
+    if (this.files.length) {
+        let file = this.files[0];
+        console.log('File you selected is', file.name);
+        // Similarly, send this file to the server for saving.
+    }
+});
+
+document.getElementById('modeToggle').addEventListener('change', function() {
+    const isReceiver = this.checked;
+    document.getElementById('senderForm').style.display = isReceiver ? 'none' : 'block';
+    document.getElementById('receiverForm').style.display = isReceiver ? 'block' : 'none';
+    document.getElementById('modeLabel').textContent = isReceiver ? 'Receiver' : 'Sender';
+});
+
+document.querySelector('.submit-btn').addEventListener('click', function() {
+    const isReceiver = document.getElementById('modeToggle').checked;
+
+    // Sender data
+    const seedInput = document.getElementById('seedInput').value;
+    const receiverAddressInput = document.getElementById('receiverAddressInput').value;
+    const escrowAmountInput = document.getElementById('escrowAmountInput').value;
+
+    // Receiver data
+    const receiverSeedInput = document.getElementById('receiverSeedInput').value;
+    const originalAddressInput = document.getElementById('originalAddressInput').value;
+    const sequenceNumberInput = document.getElementById('sequenceNumberInput').value;
+
+    const payload = isReceiver ? {
+        receiverSeedInput,
+        originalAddressInput,
+        sequenceNumberInput,
+    } : {
+        seedInput,
+        receiverAddressInput,
+        escrowAmountInput,
+    };
+
+    fetch('/submit', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log(data);
+        if(data.success) {
+            // Display the received message (which already includes the sequence number)
+            document.body.innerHTML += `<p>${data.message}</p>`;
+        } else {
+            // Handle failure case
+            document.body.innerHTML += `<p>Transaction failed: ${data.message}</p>`;
+        }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+        document.body.innerHTML += `<p>Transaction failed: ${error}</p>`;
+    });
+});
+
+
+
+</script>
+
+</body>
+</html>
