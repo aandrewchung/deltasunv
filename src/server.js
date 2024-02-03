@@ -1,6 +1,6 @@
 const express = require('express');
 const { executeCreate, executeFinish } = require('./will'); // Ensure executeFinish is exported from test.js
-const { generateUniqueID } = require('./utils'); // Adjust the path accordingly
+const { generateUniqueID, generateImage } = require('./utils'); // Adjust the path accordingly
 const { sendXRP } = require('./sendxrp');
 const { burnXRP } = require('./burn');
 
@@ -63,6 +63,7 @@ app.post('/newFuneral', upload.single('picture'), async (req, res) => {
         // Extract data from the form submission
         const { firstName, lastName, dateOfBirth, dateOfDeath, aiBackground, story } = req.body;
 
+        // console.log(aiBackground);
         // Convert dates from YYYY-MM-DD to MM/DD/YY
         const convertDate = (dateString) => {
             const [year, month, day] = dateString.split("-");
@@ -75,7 +76,9 @@ app.post('/newFuneral', upload.single('picture'), async (req, res) => {
         const uniqueID = generateUniqueID(lastName, firstName, birthDateFormatted, dateOfDeathFormatted);
         // Include your logic to save the funeral information to a database
 
-        sendXRP(uniqueID, "testingCID");
+        await generateImage(aiBackground);
+
+        await sendXRP(uniqueID, "testingCID");
         
         res.json({ success: true, message: `Funeral created successfully with ID: ${uniqueID}` });
     } catch (error) {
